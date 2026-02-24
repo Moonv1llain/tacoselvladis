@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tacos El Vladis · Oxnard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Unbounded:wght@700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TOKENS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root {
+        --gold:   #C8680A;
+        --sun:    #E88C1A;
+        --amber:  #F5A623;
+        --pale:   #FDEFC3;
+        --red:    #C0291C;
+        --green:  #053D2E;
+        --green2: #075C44;
+        --dark:   #160C00;
+        --white:  #FFF9EE;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: var(--sun);
+        color: var(--dark);
+        overflow-x: hidden;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NOISE TEXTURE OVERLAY
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    body::before {
+        content: '';
+        position: fixed; inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 9000;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SKY GRADIENT — big warm backdrop
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .sky {
+        position: fixed; inset: 0;
+        background: linear-gradient(
+            180deg,
+            #F6A623 0%,
+            #E0760D 35%,
+            #C8580A 65%,
+            #8B2E00 100%
+        );
+        z-index: 0;
+    }
+
+
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SUN DISC
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .sun-disc {
+        position: fixed;
+        top: -60px; left: 50%; transform: translateX(-50%);
+        width: min(520px, 120vw); height: min(520px, 120vw);
+        border-radius: 50%;
+        background: radial-gradient(circle,
+            rgba(255,235,150,0.9) 0%,
+            rgba(255,200,80,0.55) 35%,
+            rgba(255,160,30,0.2) 60%,
+            transparent 75%
+        );
+        pointer-events: none; z-index: 1;
+        animation: sunbreath 7s ease-in-out infinite;
+    }
+    @keyframes sunbreath {
+        0%,100% { transform: translateX(-50%) scale(1);   opacity: 0.85; }
+        50%      { transform: translateX(-50%) scale(1.06); opacity: 1; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PALM TREES + WELCOME SIGN
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .palms {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 42vh;
+        pointer-events: none;
+        z-index: 2;
+        overflow: visible;  /* never clip the sign */
+    }
+
+    /* Single palm layer — no doubling */
+    .palm-layer {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 100%;
+        background: url('https://i.postimg.cc/C1nPcy5D/palmtree.png') repeat-x bottom center;
+        background-size: auto 100%;
+        filter: brightness(0.15) saturate(0.2) sepia(0.3);
+        opacity: 0.75;
+        animation: windB 9s ease-in-out infinite;
+        transform-origin: bottom center;
+    }
+    @keyframes windB {
+        0%,100% { transform: skewX(0deg) translateX(0px); }
+        35%      { transform: skewX(0.9deg) translateX(7px); }
+        70%      { transform: skewX(-0.6deg) translateX(-5px); }
+    }
+
+    /* Welcome sign — planted at ground level like a pole sign, no cutoff */
+    .welcome-sign {
+        position: absolute;
+        bottom: 0;
+        left: 3%;
+        z-index: 4;
+        display: flex;
+        align-items: flex-end;
+        animation: windB 9s ease-in-out infinite;
+        transform-origin: bottom center;
+    }
+    .welcome-sign img {
+        width: 180px;
+        display: block;
+        filter: drop-shadow(0 4px 16px rgba(0,0,0,0.35));
+        margin-bottom: 0;
+        animation: signIn 1s 0.7s cubic-bezier(0.23,1,0.32,1) both;
+    }
+    @keyframes signIn {
+        from { opacity:0; transform: translateY(16px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       HERO
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .hero {
+        position: relative; z-index: 10;
+        min-height: 100dvh;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 2rem 1.5rem 8rem;
+        text-align: center;
+    }
+
+    .hero-lockup {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+
+
+    .hero-logo {
+        width: clamp(230px, 58vw, 430px);
+        filter:
+            drop-shadow(0 2px 0px rgba(0,0,0,0.3))
+            drop-shadow(0 16px 48px rgba(0,0,0,0.22));
+        animation: logoIn 1s 0.1s cubic-bezier(0.23,1,0.32,1) both;
+        position: relative; z-index: 1;
+    }
+    @keyframes logoIn {
+        from { opacity:0; transform: translateY(-18px) scale(0.94); }
+        to   { opacity:1; transform: none; }
+    }
+
+    .hero-sub {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic; font-weight: 300;
+        font-size: clamp(1.05rem, 4vw, 1.45rem);
+        color: rgba(255,245,210,0.8);
+        margin-top: 1.6rem;
+        letter-spacing: 0.03em;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        animation: fadeUp 0.9s 0.65s both;
+    }
+
+    /* Hours pill in hero */
+    .hero-hours {
+        display: inline-flex; align-items: center; gap: 0.6rem;
+        background: rgba(0,0,0,0.32);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 100px;
+        padding: 0.55rem 1.25rem;
+        margin-top: 1.4rem;
+        animation: fadeUp 0.9s 0.85s both;
+    }
+    .hero-hours-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #FF6B6B;
+        flex-shrink: 0;
+    }
+    .hero-hours-t {
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+        color: rgba(255,255,255,0.8);
+    }
+    .hero-hours-sub {
+        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em;
+        color: rgba(255,255,255,0.45);
+    }
+
+    .scroll-cue {
+        position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        color: rgba(255,255,255,0.35); font-size: 0.55rem;
+        font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase;
+        animation: fadeUp 1s 1.4s both;
+    }
+    .scroll-bar {
+        width: 1px; height: 28px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+        animation: drip 2s ease-in-out infinite;
+    }
+    @keyframes drip { 0%,100%{opacity:0.3;height:18px} 55%{opacity:1;height:32px} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       DARK SECTION BASE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .body-section {
+        position: relative; z-index: 10;
+        background: var(--dark);
+        border-radius: 28px 28px 0 0;
+        margin-top: -28px;
+        overflow: hidden;
+    }
+    /* warm inner glow at the very top edge */
+    .body-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 160px;
+        background: radial-gradient(ellipse at 50% 0%, rgba(245,166,35,0.12) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTENT WRAPPER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem 10rem;
+    }
+
+    /* Section label */
+    .lbl {
+        font-size: 0.58rem; font-weight: 800;
+        letter-spacing: 0.5em; text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        margin: 5rem 0 1.6rem;
+        display: flex; align-items: center; gap: 0.8rem;
+    }
+    .lbl::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--amber); flex-shrink:0; }
+    .lbl::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PHOTO SPREAD
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .photos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 260px 190px;
+        gap: 0.9rem;
+    }
+    .ph {
+        border-radius: 16px; overflow: hidden;
+        position: relative;
+    }
+    .ph::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .ph img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform 0.9s cubic-bezier(0.23,1,0.32,1);
+        filter: saturate(1.15) brightness(1.02) sepia(0.08);
+    }
+    .ph:hover img { transform: scale(1.06); }
+    .ph-tall { grid-row: span 2; }
+
+    .ph-quote {
+        background: var(--green);
+        border-radius: 16px;
+        display: flex; flex-direction: column;
+        justify-content: center; padding: 1.8rem 1.6rem;
+        position: relative; overflow: hidden;
+    }
+    .ph-quote::before {
+        content: '"';
+        position: absolute; top: -20px; left: 10px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 9rem; color: rgba(255,255,255,0.05);
+        line-height: 1; pointer-events: none;
+    }
+    .ph-quote q {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic; font-weight: 300;
+        font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+        color: rgba(255,245,210,0.9); line-height: 1.6; quotes: none;
+        position: relative; z-index: 1;
+    }
+    .ph-quote cite {
+        font-style: normal; font-size: 0.58rem; font-weight: 800;
+        letter-spacing: 0.3em; text-transform: uppercase;
+        color: rgba(255,255,255,0.3); display: block; margin-top: 0.9rem;
+        position: relative; z-index: 1;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PROTEINS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .proteins {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 18px;
+        padding: 2.2rem 2rem 2.4rem;
+    }
+    .proteins-eyebrow {
+        font-size: 0.58rem; font-weight: 800; letter-spacing: 0.45em;
+        text-transform: uppercase; color: rgba(255,255,255,0.2);
+        margin-bottom: 1.2rem;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .chip {
+        font-family: 'Outfit', sans-serif; font-weight: 800;
+        font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
+        padding: 0.52rem 1.2rem; border-radius: 5px;
+        cursor: default;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .chip:hover { transform: translate(-2px,-3px); }
+    .chip-w {
+        background: var(--pale); color: var(--dark);
+        box-shadow: 3px 3px 0 var(--green);
+    }
+    .chip-w:hover { box-shadow: 5px 5px 0 var(--green2); }
+    .chip-r {
+        background: var(--red); color: white;
+        box-shadow: 3px 3px 0 rgba(255,255,255,0.1);
+        font-size: 0.88rem;
+        padding: 0.58rem 1.4rem;
+    }
+    .chip-r:hover { box-shadow: 5px 5px 0 rgba(255,255,255,0.2); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MENU — large editorial list
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .menu-list { list-style: none; }
+    .menu-item {
+        display: grid;
+        grid-template-columns: 2.5rem 1fr;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.35rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        position: relative;
+        transition: padding-left 0.25s ease;
+        cursor: default;
+    }
+    .menu-item:first-child { border-top: 1px solid rgba(255,255,255,0.07); }
+    .menu-item::before {
+        content: '';
+        position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        width: 0; height: 2px;
+        background: var(--amber);
+        transition: width 0.3s ease;
+    }
+    .menu-item:hover { padding-left: 1.4rem; }
+    .menu-item:hover::before { width: 1rem; }
+
+    .mi-num {
+        font-size: 0.58rem; font-weight: 800; letter-spacing: 0.2em;
+        color: rgba(255,255,255,0.2); text-align: right;
+    }
+    .mi-name {
+        font-family: 'Unbounded', sans-serif;
+        font-size: clamp(1.05rem, 3.5vw, 1.5rem);
+        font-weight: 700; color: white; letter-spacing: -0.01em;
+        transition: color 0.25s ease;
+    }
+    .menu-item:hover .mi-name { color: var(--amber); }
+    .mi-arr {
+        font-size: 1rem; color: rgba(255,255,255,0.1);
+        transition: color 0.25s, transform 0.25s;
+    }
+    .menu-item:hover .mi-arr {
+        color: var(--amber);
+        transform: translate(3px,-2px);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       REVIEWS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .reviews {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+    .rv {
+        padding: 2.2rem 2rem;
+        border-radius: 5px;
+    }
+    .rv-a {
+        background: var(--pale); color: var(--dark);
+        transform: rotate(-1.3deg);
+        box-shadow: 7px 7px 0 rgba(0,0,0,0.35);
+    }
+    .rv-b {
+        background: var(--green); color: white;
+        transform: rotate(1.2deg);
+        box-shadow: 7px 7px 0 rgba(0,0,0,0.35);
+        margin-top: 2rem;
+    }
+    .rv-yelp {
+        display: inline-block;
+        background: #d32323; color: white;
+        font-family: 'Unbounded', sans-serif;
+        font-size: 0.55rem; font-weight: 900; letter-spacing: 0.1em;
+        padding: 0.22rem 0.55rem; border-radius: 3px; margin-bottom: 0.9rem;
+    }
+    .rv-stars { color: #E8B000; font-size: 0.95rem; margin-bottom: 0.75rem; letter-spacing: 1px; }
+    .rv-b .rv-stars { color: #F5C842; }
+    .rv-text {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic; font-weight: 300;
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem); line-height: 1.65;
+    }
+    .rv-b .rv-text { color: rgba(255,245,210,0.9); }
+    .rv-by {
+        margin-top: 1.1rem; font-size: 0.58rem; font-weight: 800;
+        letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.32;
+    }
+    .rv-b .rv-by { color: white; opacity: 0.45; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LOCATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .location {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 1rem;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 22px;
+        padding: 1rem;
+    }
+    .map-cell {
+        border-radius: 15px; overflow: hidden;
+        height: 320px;
+    }
+    .map-cell iframe { width:100%; height:100%; border:0; display:block; }
+    .loc-info {
+        display: flex; flex-direction: column;
+        justify-content: center; padding: 0.8rem 0.6rem;
+        gap: 0.35rem;
+    }
+    .loc-eyebrow {
+        font-size: 0.58rem; font-weight: 800; letter-spacing: 0.45em;
+        text-transform: uppercase; color: rgba(255,255,255,0.25);
+        margin-bottom: 0.4rem;
+    }
+    .loc-addr {
+        font-family: 'Unbounded', sans-serif;
+        font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+        font-weight: 700; line-height: 1.2; color: white;
+    }
+    .loc-city { font-size: 0.82rem; color: rgba(255,255,255,0.3); margin-bottom: 1.3rem; }
+    .loc-hours { display: flex; align-items: center; gap: 0.7rem; }
+    .live-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #5DF082; flex-shrink: 0;
+        box-shadow: 0 0 0 0 rgba(93,240,130,0.5);
+        animation: ping2 1.8s ease-in-out infinite;
+    }
+    @keyframes ping2 {
+        0%  { box-shadow: 0 0 0 0   rgba(93,240,130,0.5); }
+        70% { box-shadow: 0 0 0 7px rgba(93,240,130,0); }
+        100%{ box-shadow: 0 0 0 0   rgba(93,240,130,0); }
+    }
+    .loc-hours-t { font-weight: 700; color: white; font-size: 0.9rem; }
+    .loc-closed { font-size: 0.7rem; color: rgba(255,255,255,0.22); margin-top: 0.2rem; }
+
+    .footer {
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 3.5rem 1.5rem 3rem;
+        text-align: center;
+        display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+    }
+    .footer img { width: 150px; opacity: 0.75; }
+    .footer-line {
+        font-size: 0.6rem; font-weight: 700; letter-spacing: 0.3em;
+        text-transform: uppercase; color: rgba(255,255,255,0.18);
+        margin-top: 0.3rem;
+    }
+    .footer-ig {
+        font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        transition: color 0.2s;
+        margin-top: 0.2rem;
+    }
+    .footer-ig:hover { color: #E1306C; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       IG FAB
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .insta-fab {
+        position: fixed; bottom: 1.5rem; right: 1.5rem;
+        background: #E1306C; color: white;
+        padding: 0.82rem 1.7rem; border-radius: 100px;
+        text-decoration: none; font-weight: 800;
+        font-size: 0.75rem; letter-spacing: 0.04em;
+        z-index: 200;
+        box-shadow: 0 6px 24px rgba(225,48,108,0.42);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .insta-fab:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(225,48,108,0.52); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       REVEAL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .r  { opacity:0; transform:translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .r.in { opacity:1; transform:none; }
+    .d1 { transition-delay: 0.08s; }
+    .d2 { transition-delay: 0.15s; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MOBILE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (max-width: 680px) {
+        .photos {
+            grid-template-columns: 1fr;
+            grid-template-rows: 280px 200px auto;
+        }
+        .ph-tall { grid-row: span 1; }
+        .reviews { grid-template-columns: 1fr; gap: 1.4rem; }
+        .rv-b { margin-top: 0; transform: rotate(1deg); }
+        .rv-a { transform: rotate(-1deg); }
+        .location { grid-template-columns: 1fr; }
+        .map-cell { height: 230px; }
+        .loc-info { padding: 1rem 0.2rem 0.2rem; }
+        .wrap { padding: 0 1.1rem 12rem; }
+        .menu-item { grid-template-columns: 2rem 1fr; }
+        .welcome-sign img { width: 130px; }
+    }
+    @media (max-width: 400px) {
+        .welcome-sign img { width: 110px; }
+    }
+    </style>
+</head>
+<body>
+
+    <div class="sky"></div>
+    <div class="sun-disc"></div>
+
+    <div class="palms">
+        <div class="palm-layer" id="palmB"></div>
+        <div class="welcome-sign">
+            <img src="https://i.postimg.cc/5tr1HMD3/welcome.png" alt="Welcome to Oxnard">
+        </div>
+    </div>
+
+    <!-- ══ HERO ══ -->
+    <section class="hero">
+        <div class="hero-lockup">
+            <img class="hero-logo" src="https://i.postimg.cc/J40yv1M7/vladis.png" alt="Tacos El Vladis">
+        </div>
+
+        <div class="hero-hours">
+            <span class="hero-hours-dot"></span>
+            <span class="hero-hours-t">Closed today</span>
+            <span class="hero-hours-sub">· Opens Wed 5:30 PM</span>
+        </div>
+        <div class="scroll-cue">
+            <div class="scroll-bar"></div>
+            scroll
+        </div>
+    </section>
+
+    <!-- ══ DARK BODY ══ -->
+    <div class="body-section">
+
+
+        <div class="wrap">
+
+            <!-- PHOTOS -->
+            <p class="lbl r">The Real Deal</p>
+            <div class="photos r d1">
+                <div class="ph ph-tall">
+                    <img src="https://i.postimg.cc/yNDkxKvG/tacos.jpg" alt="Surf & Turf Tacos">
+                </div>
+                <div class="ph">
+                    <img src="https://i.postimg.cc/4dtyv5CD/tacos2.jpg" alt="Tacos El Vladis">
+                </div>
+                <div class="ph-quote r d2">
+                    <q>The strawberry pico on top is actual genius. Best truck in Oxnard.</q>
+                    <cite>— Yelp Elite</cite>
+                </div>
+            </div>
+
+            <!-- PROTEINS -->
+            <p class="lbl r">Proteins</p>
+            <div class="proteins r d1">
+                <p class="proteins-eyebrow">Choose your protein</p>
+                <div class="chips">
+                    <span class="chip chip-r">Surf &amp; Turf ✦</span>
+                    <span class="chip chip-w">Asada</span>
+                    <span class="chip chip-w">Al Pastor</span>
+                    <span class="chip chip-w">Pollo</span>
+                    <span class="chip chip-w">Camaron</span>
+                    <span class="chip chip-w">Cecina</span>
+                    <span class="chip chip-w">Milanesa</span>
+                    <span class="chip chip-w">Tripas</span>
+                </div>
+            </div>
+
+            <!-- MENU -->
+            <p class="lbl r">The Lineup</p>
+            <ul class="menu-list r d1">
+                <li class="menu-item"><span class="mi-num">01</span><span class="mi-name">Tacos</span></li>
+                <li class="menu-item"><span class="mi-num">02</span><span class="mi-name">Burritos</span></li>
+                <li class="menu-item"><span class="mi-num">03</span><span class="mi-name">Quesadillas</span></li>
+                <li class="menu-item"><span class="mi-num">04</span><span class="mi-name">Mulitas</span></li>
+                <li class="menu-item"><span class="mi-num">05</span><span class="mi-name">Tortas</span></li>
+                <li class="menu-item"><span class="mi-num">06</span><span class="mi-name">Aguas Frescas</span></li>
+            </ul>
+
+            <!-- REVIEWS -->
+            <p class="lbl r">The Word on Yelp</p>
+            <div class="reviews">
+                <div class="rv rv-a r d1">
+                    <div class="rv-yelp">yelp</div>
+                    <div class="rv-stars">★★★★★</div>
+                    <p class="rv-text">"The Surf and Turf is mandatory. The strawberry pico on top is actual genius. Best truck in Oxnard."</p>
+                    <p class="rv-by">— Yelp Elite</p>
+                </div>
+                <div class="rv rv-b r d2">
+                    <div class="rv-stars">★★★★★</div>
+                    <p class="rv-text">"Tripas are perfectly crispy. The mulitas are massive. Don't skip the strawberry agua fresca."</p>
+                    <p class="rv-by">— Local Guide</p>
+                </div>
+            </div>
+
+            <!-- LOCATION -->
+            <p class="lbl r">Find Us</p>
+            <div class="location r d1">
+                <div class="map-cell">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3301.956793617188!2d-119.1764676!3d34.211333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80e84d3723df8fcf%3A0x6201ab411ae0fcd6!2sTacos%20El%20Vladis%20(Taco%20Truck)!5e0!3m2!1sen!2sus!4v1700000000000"
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="loc-info">
+                    <p class="loc-eyebrow">Location</p>
+                    <p class="loc-addr">2251 Oxnard Blvd</p>
+                    <p class="loc-city">Oxnard, California</p>
+                    <div class="loc-hours">
+                        <span class="live-dot"></span>
+                        <span class="loc-hours-t">Wed – Sun · 5:30–11 PM</span>
+                    </div>
+                    <p class="loc-closed">Closed Mon &amp; Tue</p>
+                </div>
+            </div>
+
+        </div><!-- /wrap -->
+
+        <footer class="footer">
+            <img src="https://i.postimg.cc/J40yv1M7/vladis.png" alt="Tacos El Vladis">
+            <a href="https://www.instagram.com/tacos_el_vladis/?hl=en" class="footer-ig" target="_blank">@tacos_el_vladis</a>
+            <p class="footer-line">2251 Oxnard Blvd · Oxnard, CA · Wed–Sun 5:30–11PM</p>
+        </footer>
+
+    </div><!-- /body-section -->
+
+    <a href="https://www.instagram.com/tacos_el_vladis/?hl=en" class="insta-fab" target="_blank">@TACOS_EL_VLADIS</a>
+
+    <script>
+    // Palm parallax on scroll
+    const pb = document.getElementById('palmB');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const s = window.pageYOffset;
+                pb.style.transform = `translateY(${s * 0.07}px)`;
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+
+    // Stagger menu items
+    document.querySelectorAll('.menu-item').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-12px)';
+        el.style.transition = `opacity 0.45s ease ${i * 0.07}s, transform 0.45s ease ${i * 0.07}s`;
+    });
+    const menuIo = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.querySelectorAll('.menu-item').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                });
+                menuIo.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    const menuList = document.querySelector('.menu-list');
+    if (menuList) menuIo.observe(menuList);
+
+    // Scroll reveal
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.07 });
+    document.querySelectorAll('.r').forEach(el => io.observe(el));
+    </script>
+</body>
+</html>
